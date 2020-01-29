@@ -1,9 +1,9 @@
 [
   {
-    "Description": "{{ s3_bucket }}",
+    "Description": "{{ s3_ova_bucket }}",
     "Format": "ova",
     "UserBucket": {
-        "S3Bucket": "{{ s3_bucket }}",
-        "S3Key": "{{ s3_key }}"
+        "S3Bucket": "{{ s3_ova_bucket }}",
+        "S3Key": "{{ builders_vm_name }}.ova"
     }
 }]

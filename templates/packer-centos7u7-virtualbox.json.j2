@@ -1,0 +1,23 @@
+{
+  "variables":
+  {},
+  "builders":
+  [{ "type": "virtualbox-iso",
+    "iso_url": "{{ builders_iso_url }}",
+    "iso_checksum": "{{ builders_iso_checksum }}",
+    "iso_checksum_type": "{{ builders_iso_checksum_type }}",
+    "headless": "false",
+    "output_directory": "files",
+    "vm_name": "{{ builders_vm_name }}",
+    "guest_os_type":"RedHat_64",
+    "disk_size": "20480",
+    "boot_wait": "5s",
+    "http_directory": "src",
+    "boot_command": [ "<tab> text ks=http://{{ '{{ .HTTPIP }}' }}:{{ '{{ .HTTPPort }}' }}/{{ builders_ks }} <enter><wait>" ],
+    "ssh_username": "{{ builders_ssh_username }}",
+    "ssh_password": "{{ builders_ssh_password }}",
+    "ssh_wait_timeout":"1000s",
+    "shutdown_command": "shutdown -P now",
+    "format": "ova"
+    }]
+}

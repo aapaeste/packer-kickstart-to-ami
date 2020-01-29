@@ -1,4 +1,5 @@
 builds/
+files/
 packer_cache/
 src/repos/*
 aws_config/

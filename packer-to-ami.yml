@@ -1,0 +1,60 @@
+---
+- name: upload and create ami
+  hosts: localhost
+  connection: local
+  vars:
+    # packer variables
+    packer_template: "packer-centos7u7-virtualbox.json.j2"
+    builders_iso_url: "/home/aapaeste/centos-iso/CentOS-7-x86_64-DVD-1810.iso"
+    builders_iso_checksum: "6d44331cc4f6c506c7bbe9feb8468fad6c51a88ca1393ca6b8b486ea04bec3c1"
+    builders_iso_checksum_type: "sha256"
+    builders_vm_name: "centos7u7"
+    builders_ks: "centos7u7-ks.cfg"
+    builders_ssh_username: "root"
+    builders_ssh_password: "r3dh4t1!"
+    post_region: "us-east-1"
+    # Amazon account variables
+    s3_ova_bucket: "ova-repos"
+    # Default variables
+    containers_template: "containers.json.j2"
+    
+  tasks:
+  - name: configure packer configuration file
+    template:
+      src: "{{ packer_template }}" 
+      dest: /tmp
+      mode: '0644'
+    tags: [build]
+
+  - name: build ova
+    shell: "packer build /tmp/{{ packer_template }}"
+    tags: [build]
+
+  - name: upload ova to s3
+    aws_s3:
+      bucket: "{{ s3_ova_bucket }}"
+      object: "{{ builders_vm_name }}.ova" 
+      src: "{{ builders_vm_name }}.ova"
+      mode: put 
+    tags: [upload]
+
+  - name: configure containers file
+    template:
+      src: "{{ containers_template }}" 
+      dest: /tmp
+      mode: '0644'
+    tags: [amazon-import]
+
+  - name: amazon import
+    shell: "aws ec2 import-image --description {{ builders_vm_name }}.ova --license-type BYOL --disk-containers file:///tmp/{{ containers_template }}"
+    tags: [amazon-import]
+
+  - name: describe amazon import
+    shell: aws ec2 describe-import-image-tasks
+    register: monitor
+    tags: [monitor]
+
+  - name: display monitor amazon import
+    debug:
+      var: monitor.stdout
+    tags: [monitor]
